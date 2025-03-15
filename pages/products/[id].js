@@ -1,32 +1,26 @@
 import { useRouter } from 'next/router';
-import { fetchProduct } from '@/utils/api';
-import { Container, Row, Col, Image, Button } from 'react-bootstrap';
+import axios from 'axios';
 
-const ProductPage = ({ product }) => {
+const Product = ({ product }) => {
   const router = useRouter();
+
   if (router.isFallback) {
-    return <div>Loading</div>;
+    return <div>Loading...</div>;
   }
 
   return (
-    <Container>
-      <Row className="my-4">
-        <Col md={6}>
-          <Image src={product.image} fluid />
-        </Col>
-        <Col md={6}>
-          <h1>{product.title}</h1>
-          <p>{product.description}</p>
-          <h3>${product.price}</h3>
-          <Button variant="primary">Add to Cart</Button>
-        </Col>
-      </Row>
-    </Container>
+    <div>
+      <h1>{product.title}</h1>
+      <p>{product.description}</p>
+      <p>{product.price}</p>
+    </div>
   );
 };
 
 export async function getStaticPaths() {
-  const products = await fetchProducts();
+  const res = await axios.get('https://fakestoreapi.com/products');
+  const products = res.data;
+
   const paths = products.map((product) => ({
     params: { id: product.id.toString() },
   }));
@@ -35,7 +29,9 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  const product = await fetchProduct(params.id);
+  const res = await axios.get(`https://fakestoreapi.com/products/${params.id}`);
+  const product = res.data;
+
   return {
     props: {
       product,
@@ -43,4 +39,4 @@ export async function getStaticProps({ params }) {
   };
 }
 
-export default ProductPage;
+export default Product;
